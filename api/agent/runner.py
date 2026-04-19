@@ -5,7 +5,7 @@ import time
 import uuid
 from typing import Any, Dict, Optional
 
-from agent.graph import graph  # type: ignore
+from agent.graph import get_graph  # type: ignore
 from agent.nodes import PENDING_THREADS, sanitize_goal  # type: ignore
 from agent.schemas import Clarification, DecomposerState  # type: ignore
 from agent.tools import classic_evaluate_state, DEFAULT_TIMEZONE  # type: ignore
@@ -51,7 +51,7 @@ def run_decomposer(
     state = initial_state(goal, capacity_hours_per_week, target_weeks, timezone, thread_id)
     config = {"configurable": {"thread_id": state["thread_id"]}}
     try:
-        final_state = graph.invoke(state, config=config)
+        final_state = get_graph().invoke(state, config=config)
     except Exception as exc:
         final_state = dict(state)
         final_state["error"] = f"Graceful decomposer error: {exc.__class__.__name__}: {exc}"

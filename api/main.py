@@ -39,10 +39,28 @@ app.include_router(quests_router)
 # ── Startup ───────────────────────────────────────────────────────────────────
 @app.on_event("startup")
 def on_startup():
-    init_db()
-    logger.info("NUDG API ready")
+    try:
+        init_db()
+        logger.info("Database initialised")
+    except Exception as exc:
+        logger.error("DB init failed: %s", exc)
+
+    # Attempt to warm up the LangGraph singleton and log any error clearly.
+    try:
+        from agent.graph import get_graph  # type: ignore
+        get_graph()
+        logger.info("LangGraph graph compiled successfully")
+    except Exception as exc:
+        logger.warning("LangGraph graph init failed (will retry on first request): %s", exc)
+
+    logger.info("NUDG API ready — PORT=%s", os.environ.get("PORT", "8000"))
 
 
 @app.get("/healthz")
 def health():
-    return {"status": "ok"}
+    from agent.graph import _graph_error  # type: ignore
+    return {
+        "status": "ok",
+        "graph": "error" if _graph_error else "ready",
+        "graph_error": _graph_error,
+    }

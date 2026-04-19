@@ -89,5 +89,27 @@ def build_graph():
     return builder.compile(checkpointer=InMemorySaver())
 
 
-# Singleton compiled graph
-graph = build_graph()
+# Lazy singleton — built on first use so import errors don't crash FastAPI startup.
+_graph = None
+_graph_error: str | None = None
+
+
+def get_graph():
+    global _graph, _graph_error
+    if _graph is None and _graph_error is None:
+        try:
+            _graph = build_graph()
+        except Exception as exc:  # pragma: no cover
+            _graph_error = f"{exc.__class__.__name__}: {exc}"
+    if _graph_error:
+        raise RuntimeError(f"LangGraph failed to initialize: {_graph_error}")
+    return _graph
+
+
+# Keep 'graph' as a module-level alias for backwards compatibility (notebook imports).
+# In the FastAPI context, runner.py uses get_graph() instead.
+try:
+    graph = build_graph()
+except Exception as _exc:
+    graph = None  # type: ignore
+    _graph_error = f"{_exc.__class__.__name__}: {_exc}"
