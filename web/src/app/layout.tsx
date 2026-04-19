@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "NUDG — Goal Tracking Platform",
@@ -13,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#0A0A0F] text-white antialiased">
+      <body className={`${inter.className} min-h-screen bg-[#0A0A0F] text-white antialiased`}>
         {/* Top navigation */}
         <nav className="sticky top-0 z-40 border-b border-[#1E1E2E] bg-[#0A0A0F]/80 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
