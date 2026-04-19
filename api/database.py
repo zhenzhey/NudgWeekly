@@ -5,7 +5,14 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./nudg.db")
+_raw_url = os.environ.get("DATABASE_URL", "").strip()
+
+# Railway provides postgres:// but SQLAlchemy 2.x requires postgresql://
+if _raw_url.startswith("postgres://"):
+    _raw_url = "postgresql://" + _raw_url[len("postgres://"):]
+
+# Fall back to local SQLite if no valid URL is configured
+DATABASE_URL = _raw_url if _raw_url.startswith(("sqlite://", "postgresql://")) else "sqlite:///./nudg.db"
 
 # SQLite needs check_same_thread=False; PostgreSQL ignores connect_args
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
