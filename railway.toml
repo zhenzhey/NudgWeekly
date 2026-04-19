@@ -1,0 +1,21 @@
+# Railway monorepo deployment guide
+#
+# Railway does not support multi-service railway.toml at the repo root.
+# Instead, create TWO Railway services in the dashboard for the same GitHub repo,
+# each with a different "Root Directory":
+#
+#   Service 1 — api
+#     Root Directory: api
+#     Builder:        Dockerfile
+#     Dockerfile:     Dockerfile
+#     Start command:  uvicorn main:app --host 0.0.0.0 --port $PORT
+#     Env vars:       OPENAI_API_KEY, TAVILY_API_KEY, DATABASE_URL, CORS_ORIGINS
+#
+#   Service 2 — web
+#     Root Directory: web
+#     Builder:        Dockerfile
+#     Dockerfile:     Dockerfile
+#     Start command:  node server.js
+#     Env vars:       NEXT_PUBLIC_API_URL=https://<your-api-service>.up.railway.app
+#
+# Per-service railway.toml files live at api/railway.toml and web/railway.toml.
